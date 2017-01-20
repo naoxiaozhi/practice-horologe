@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>canvas示例</title>
+<meta name="description" content="">
+<meta name="keywords" content="">
+<link href="" rel="stylesheet">
+<script type="text/javascript" src="canvas.js"></script>
+<script type="text/javascript">
+var RADIUS=8;
+var MARGINTOP=60;
+var MARGINLEFT=30;
+var WIDTH=1300;
+var HEIGHT=600;
+var ball={x:512,y:100,r:20,g:2,vx:-4,vy:-10,color:"#005588"};
+var balls=[];
+var nowDate=new Date();
+var colors=['#33b5e5','#0099cc','#aa66cc','#99cc00','#669900','#ffbb33','#ff8800','#ff4444','#cc0000','#1cf457'];
+window.onload=function(){
+	WIDTH=document.body.clientWidth;
+	MARGINLEFT=Math.round(WIDTH/10);
+	RADIUS=Math.round(WIDTH*4/5/108)-1;
+	var canvas=document.getElementById("myCanvas");
+	canvas.width=WIDTH;
+	var context=canvas.getContext("2d");
+	setInterval(function(){
+		render(context);
+		update();
+	},50);
+}
+function update(){
+	var nextDate,nextHours,nextMinutes,nextSeconds;
+	nextDate=new Date();
+	nextHours=nextDate.getHours();
+	nextMinutes=nextDate.getMinutes();
+	nextSeconds=nextDate.getSeconds();
+
+	nowHours=nowDate.getHours();
+	nowMinutes=nowDate.getMinutes();
+	nowSeconds=nowDate.getSeconds();
+
+	if(nowDate.getTime()!=nextDate.getTime()){
+		
+		if(parseInt(nowHours/10)!=parseInt(nextHours/10)){
+			
+			addBalls(MARGINLEFT,MARGINTOP,parseInt(nowHours/10));
+		}
+		if(parseInt(nowHours%10)!=parseInt(nextHours%10)){
+			
+			addBalls(MARGINLEFT+15*(RADIUS+1),MARGINTOP,parseInt(nowHours/10));
+		}
+		if(parseInt(nowMinutes/10)!=parseInt(nextMinutes/10)){
+			
+			addBalls(MARGINLEFT+40*(RADIUS+1),MARGINTOP,parseInt(nowMinutes/10));
+		}
+		if(parseInt(nowMinutes%10)!=parseInt(nextMinutes%10)){
+			
+			addBalls(MARGINLEFT+55*(RADIUS+1),MARGINTOP,parseInt(nowMinutes%10));
+		}
+		if(parseInt(nowSeconds/10)!=parseInt(nextSeconds/10)){
+			
+			addBalls(MARGINLEFT+80*(RADIUS+1),MARGINTOP,parseInt(nowSeconds/10));
+		}
+		if(parseInt(nowSeconds%10)!=parseInt(nextSeconds%10)){
+			
+			addBalls(MARGINLEFT+95*(RADIUS+1),MARGINTOP,parseInt(nowSeconds%10));
+		}
+		nowDate=nextDate;
+	}
+	console.log(balls.length);
+	for(var m=0;m<balls.length;m++){
+		
+		balls[m].x+=balls[m].vx;
+		balls[m].y+=balls[m].vy;
+		balls[m].vy+=balls[m].g;
+		if(balls[m].y>=600-RADIUS){
+			balls[m].y=600-RADIUS;
+			balls[m].vy=-balls[m].vy*0.75;
+		}
+	}
+	var count=0;
+	for(var n=0;n<balls.length;n++){
+		if(balls[n].x+RADIUS>0 && balls[n].x-RADIUS<WIDTH){
+			balls[count++]=balls[n]
+		}
+	}
+	while(balls.length>count){
+		balls.pop();
+	}
+}
+function addBalls(x,y,num){
+	for(var i=0;i<canvas_data[num].length;i++){
+		for(var j=0;j<canvas_data[num][i].length;j++){
+			if(canvas_data[num][i][j]==1){
+				var aBall={
+					x:x+j*2*(RADIUS+1)+(RADIUS+1),
+					y:y+i*2*(RADIUS+1)+(RADIUS+1),
+					g:1.5+Math.random(),
+					vx:Math.pow(-1,Math.ceil(Math.random()*1000))*4,
+					vy:-5,
+					color:colors[Math.floor(Math.random()*(colors.length))]
+				};
+				balls.push(aBall);
+			
+			}
+		}
+	}
+}
+function render(cxt){
+	var hours=nowDate.getHours();
+	var minutes=nowDate.getMinutes();
+	var seconds=nowDate.getSeconds();
+	cxt.clearRect(0, 0, WIDTH, HEIGHT);
+	renderDraw(MARGINLEFT,MARGINTOP,parseInt(hours/10),cxt);
+	renderDraw(MARGINLEFT+15*(RADIUS+1),MARGINTOP,parseInt(hours%10),cxt);
+	renderDraw(MARGINLEFT+30*(RADIUS+1),MARGINTOP,10,cxt);
+
+	renderDraw(MARGINLEFT+40*(RADIUS+1),MARGINTOP,parseInt(minutes/10),cxt);
+	renderDraw(MARGINLEFT+55*(RADIUS+1),MARGINTOP,parseInt(minutes%10),cxt);
+	renderDraw(MARGINLEFT+70*(RADIUS+1),MARGINTOP,10,cxt);
+
+	renderDraw(MARGINLEFT+80*(RADIUS+1),MARGINTOP,parseInt(seconds/10),cxt);
+	renderDraw(MARGINLEFT+95*(RADIUS+1),MARGINTOP,parseInt(seconds%10),cxt);
+	
+	for(var n=0;n<balls.length;n++){
+		
+		cxt.fillStyle=balls[n].color;
+		cxt.beginPath();
+		cxt.arc(balls[n].x,balls[n].y,RADIUS,0,2*Math.PI,true);
+		cxt.closePath();
+		cxt.fill();
+	}
+}
+function renderDraw(x,y,num,cxt){
+	cxt.fillStyle="rgb(0,102,153)";
+	for(var i=0;i<canvas_data[num].length;i++){
+		for(var j=0;j<canvas_data[num][i].length;j++){
+			if(canvas_data[num][i][j]==1){
+				cxt.beginPath();
+				cxt.arc(x+j*2*(RADIUS+1)+(RADIUS+1),y+i*2*(RADIUS+1)+(RADIUS+1),RADIUS,0,2*Math.PI);
+				cxt.closePath();
+				cxt.fill();
+			}
+		}
+	}
+}
+</script>
+</head>
+<body>
+    <canvas id="myCanvas" height="600px;" style="border-bottom:1px solid #ccc;display:block;margin:0 auto;"></canvas>
+</body>
+</html>
